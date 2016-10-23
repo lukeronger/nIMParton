@@ -27,7 +27,7 @@ to be effective.
 
 3. Usage
 The library consists of a C++ class named nIMParton (look ./nIMParton.h
-and ./nIMParton.cpp for details). The construction function
+and ./nIMParton.cpp for details). The constructor function
 nIMParton::nIMParton(Z, A) is used to choose a nuclear target.
 (eg. nIMParton Calcium(20, 40);) nIMParton has two important methods
 nIMParton::getRToN(Iparton, X, Q2) and  nIMParton::getRToD(Iparton, X, Q2),
