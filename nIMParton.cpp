@@ -227,11 +227,11 @@ double nIMParton::getPDFType(int Iparton, double x, double Q2) const
 	else
 	{
 		double lnx, lnQ2;
-		unsigned int i=(int)(lnx=log(x*1e6)/lnxstep);
-		unsigned int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
+		int i=(int)(lnx=log(x*1e6)/lnxstep);
+		int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
 		double g0[3], g1[3], g2[3], g[3]={0};
 		if(i<0)i=0;
-		if(i>(xMax-3))i=xMax-3;
+		if(i>(int)(xMax-3))i=xMax-3;
 		if(j<0)j=0;
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
@@ -374,11 +374,11 @@ double nIMParton::getPDFTypeD(int Iparton, double x, double Q2) const
 	else
 	{
 		double lnx, lnQ2;
-		unsigned int i=(int)(lnx=log(x*1e6)/lnxstep);
-		unsigned int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
+		int i=(int)(lnx=log(x*1e6)/lnxstep);
+		int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
 		double g0[3], g1[3], g2[3], g[3]={0};
 		if(i<0)i=0;
-		if(i>(xMax-3))i=xMax-3;
+		if(i>(int)(xMax-3))i=xMax-3;
 		if(j<0)j=0;
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
@@ -521,11 +521,11 @@ double nIMParton::getPDFTypeN(int Iparton, double x, double Q2) const
 	else
 	{
 		double lnx, lnQ2;
-		unsigned int i=(int)(lnx=log(x*1e6)/lnxstep);
-		unsigned int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
+		int i=(int)(lnx=log(x*1e6)/lnxstep);
+		int j=(int)(lnQ2=log(Q2*8)/lnQ2step);
 		double g0[3], g1[3], g2[3], g[3]={0};
 		if(i<0)i=0;
-		if(i>(xMax-3))i=xMax-3;
+		if(i>(int)(xMax-3))i=xMax-3;
 		if(j<0)j=0;
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
