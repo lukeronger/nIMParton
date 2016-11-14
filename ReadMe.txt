@@ -4,11 +4,14 @@ nIMParton v1.0
 This package gives nuclear parton distribution functions (nPDFs) of various
 nuclei starting from low Q^2 ~ 0.07 GeV^2, which are based on analysis to
 deep inelastic scattering (DIS) data applying DGLAP equations with nonlinear
-corrections. The parton recombination effect for nuclear shoadowing, nucleon
-swelling for the EMC effect, and the Fermi motion and the off-shell effect
+corrections. The extended dynamical parton model is used, which has zero gluon
+and zero sea quark distributions at the input scale Q_0^2 = 0.0671 GeV^2.
+The parton recombination effect for nuclear shadowing, nucleon swelling
+for the EMC effect, and the Fermi motion and the off-shell effect
 are taken to model the complicated x-dependence of nuclear modification.
-Refs. Xurong Chen et al, Int. J. Mod. Phys. E 23 (2014) 1450058
-[arXiv:1306.1874v2]; website, http://www.escience.cn/people/ronger/index.html
+Refs. Rong Wang, Xurong Chen, and Qiang Fu, arXiv:1611.03670;
+Xurong Chen et al, Int. J. Mod. Phys. E 23 (2014) 1450058 [arXiv:1306.1874v2];
+website, http://www.escience.cn/people/ronger/index.html
 
 2. Method
 We provide two data sets of nPDFs obtained from the global analyses to
