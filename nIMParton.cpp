@@ -1,12 +1,24 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<vector>
 extern "C"{
 #include<math.h>
 }
-#include "nIMParton.h"
+#include"nIMParton.h"
 using namespace std;
 
+//vectors to store the grid tables
+vector<double> vectorAA_largex(7840);
+vector<double> vectorAB_largex(7840);
+vector<double> vectorDA_largex(7840);
+vector<double> vectorDB_largex(7840);
+vector<double> vectorN_largex(7840);
+vector<double> vectorAA(13664);
+vector<double> vectorAB(13664);
+vector<double> vectorDA(13664);
+vector<double> vectorDB(13664);
+vector<double> vectorN(13664);
 
 //a method used to choose a data set
 void nIMParton::setDataSet(int dataset)
@@ -14,13 +26,17 @@ void nIMParton::setDataSet(int dataset)
         if(dataset==1)
         {
                 gridD = gridDA;
+                gridD_largex = gridDA_largex;
 		gridA = gridAA;
+		gridA_largex = gridAA_largex;
                 cout<<"    Using data set A."<<endl;
         }
         else if(dataset==2)
         {
                 gridD = gridDB;
+                gridD_largex = gridDB_largex;
                 gridA = gridAB;
+                gridA_largex = gridAB_largex;
                 cout<<"    Using data set B."<<endl;
         }
         else
@@ -30,34 +46,39 @@ void nIMParton::setDataSet(int dataset)
         }
 }
 
-//get parton distribution ratio of a nucleus to free nucleon
-double nIMParton::getRToN(int Iparton, double x, double Q2) const
+//get ratio of bound proton parton distribution in the nucleus to free proton parton distribution
+double nIMParton::getRToN_p(int Iparton, double x, double Q2) const
 {
 	return getPDF(Iparton, x, Q2)/getPDFN(Iparton, x, Q2);
 }
 
-//get parton distribution ratio of a nucleus to deuteron
-double nIMParton::getRToD(int Iparton, double x, double Q2) const
+//get ratio of bound proton parton distribution in the nucleus to bound proton parton distribution in the deuteron
+double nIMParton::getRToD_p(int Iparton, double x, double Q2) const
 {
 	return getPDF(Iparton, x, Q2)/getPDFD(Iparton, x, Q2);
 }
 
-//get F2 ratio of a nucleus to free nucleon
-double nIMParton::getF2RToN(double x, double Q2) const
+//get ratio of bound neutron parton distribution in the nucleus to free neutron parton distribution
+double nIMParton::getRToN_n(int Iparton, double x, double Q2) const
 {
-	return getF2(x, Q2)/getF2N(x, Q2);
+	if(Iparton==1) return getPDF(2, x, Q2)/getPDFN(2, x, Q2);
+	else if(Iparton==2) return getPDF(1, x, Q2)/getPDFN(1, x, Q2);
+	else return getPDF(Iparton, x, Q2)/getPDFN(Iparton, x, Q2);
 }
-//get F2 ratio of a nucleus to deuteron
-double nIMParton::getF2RToD(double x, double Q2) const
+
+//get ratio of bound neutron parton distribution in the nucleus to bound neutron parton distribution in the deuteron
+double nIMParton::getRToD_n(int Iparton, double x, double Q2) const
 {
-	return getF2(x, Q2)/getF2D(x, Q2);
+	if(Iparton==1) return getPDF(2, x, Q2)/getPDFD(2, x, Q2);
+	else if(Iparton==2) return getPDF(1, x, Q2)/getPDFD(1, x, Q2);
+	else return getPDF(Iparton, x, Q2)/getPDFD(Iparton, x, Q2);
 }
 
 //the constructor and initialization
 nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
 :Z(Z_temp),A(A_temp)            //Z and A are parameters for a nuclei
 {
-	cout<<"    nIMParton version - v1.0"<<endl;
+	cout<<"    nIMParton version - v1.1"<<endl;
 	char filename[50];
 	ifstream datain;
 	double x, Q2;
@@ -67,11 +88,28 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
 	flavorMax=7;
 	lnxstep=log(10)/((xMax-1)/6);
 	lnQ2step=log(2.0);
-	gridDA = new double[Q2Max*xMax*flavorMax];
-	gridDB = new double[Q2Max*xMax*flavorMax];
-	gridAA = new double[Q2Max*xMax*flavorMax];
-	gridAB = new double[Q2Max*xMax*flavorMax];
-	gridN = new double[Q2Max*xMax*flavorMax];
+
+	vectorAA_largex.resize(7849);
+	vectorAB_largex.resize(7849);
+	vectorDA_largex.resize(7849);
+	vectorDB_largex.resize(7849);
+	vectorN_largex.resize(7849);
+	vectorAA.resize(13669);
+	vectorAB.resize(13669);
+	vectorDA.resize(13669);
+	vectorDB.resize(13669);
+	vectorN.resize(13669);
+	gridAA = vectorAA.data();
+	gridAB = vectorAB.data();
+	gridDA = vectorDA.data();
+	gridDB = vectorDB.data();
+	gridN = vectorN.data();
+	gridAA_largex = vectorAA_largex.data();
+	gridAB_largex = vectorAB_largex.data();
+	gridDA_largex = vectorDA_largex.data();
+	gridDB_largex = vectorDB_largex.data();
+	gridN_largex = vectorN_largex.data();
+
 	//read grid data for interpolation
 	//reading data set A
 	sprintf(filename,"grid_data/gridn_%d_%d_SetA.dat",Z,A);
@@ -100,6 +138,32 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
 		}
 	}
 	datain.close();
+        sprintf(filename,"grid_data/gridn_%d_%d_largex_SetA.dat",Z,A); //nuclear data at large x
+        cout<<"    Loading "<<filename<<endl;
+        datain.open(filename);
+        if(!datain.good())cout<<"!!->Error: Error while opening "<<filename<<"!\n!!->grid data file not exist?"<<endl;
+        else
+        for(i=0;i<Q2Max;i++)
+        {
+                for(j=0;j<35;j++)
+                {
+                        datain>>Q2>>x>>(*(gridAA_largex+(xMax*i+j)*7))>>(*(gridAA_largex+(xMax*i+j)*7+1))>>(*(gridAA_largex+(xMax*i+j)*7+2))>>(*(gridAA_largex+(xMax*i+j)*7+3))>>(*(gridAA_largex+(xMax*i+j)*7+4))>>(*(gridAA_largex+(xMax*i+j)*7+5))>>(*(gridAA_largex+(xMax*i+j)*7+6));
+                }
+        }
+        datain.close();
+        sprintf(filename,"grid_data/gridn_%d_%d_largex_SetA.dat",1,2); //deteron data at large x
+        cout<<"    Loading "<<filename<<endl;
+        datain.open(filename);
+        if(!datain.good())cout<<"!!->Error: Error while opening "<<filename<<"!\n!!->grid data file not exist?"<<endl;
+        else
+        for(i=0;i<Q2Max;i++)
+        {
+                for(j=0;j<35;j++)
+                {
+                        datain>>Q2>>x>>(*(gridDA_largex+(xMax*i+j)*7))>>(*(gridDA_largex+(xMax*i+j)*7+1))>>(*(gridDA_largex+(xMax*i+j)*7+2))>>(*(gridDA_largex+(xMax*i+j)*7+3))>>(*(gridDA_largex+(xMax*i+j)*7+4))>>(*(gridDA_largex+(xMax*i+j)*7+5))>>(*(gridDA_largex+(xMax*i+j)*7+6));
+                }
+        }
+        datain.close(); 
 	//reading data set B
         sprintf(filename,"grid_data/gridn_%d_%d_SetB.dat",Z,A);
         cout<<"    Loading "<<filename<<endl;
@@ -127,6 +191,32 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
                 }
         }
         datain.close();
+        sprintf(filename,"grid_data/gridn_%d_%d_largex_SetB.dat",Z,A); //nuclear data at large x
+        cout<<"    Loading "<<filename<<endl;
+        datain.open(filename);
+        if(!datain.good())cout<<"!!->Error: Error while opening "<<filename<<"!\n!!->grid data file not exist?"<<endl;
+        else
+        for(i=0;i<Q2Max;i++)
+        {
+                for(j=0;j<35;j++)
+                {
+                        datain>>Q2>>x>>(*(gridAB_largex+(xMax*i+j)*7))>>(*(gridAB_largex+(xMax*i+j)*7+1))>>(*(gridAB_largex+(xMax*i+j)*7+2))>>(*(gridAB_largex+(xMax*i+j)*7+3))>>(*(gridAB_largex+(xMax*i+j)*7+4))>>(*(gridAB_largex+(xMax*i+j)*7+5))>>(*(gridAB_largex+(xMax*i+j)*7+6));
+                }
+        }
+        datain.close();
+        sprintf(filename,"grid_data/gridn_%d_%d_largex_SetB.dat",1,2); //deteron data at large x
+        cout<<"    Loading "<<filename<<endl;
+        datain.open(filename);
+        if(!datain.good())cout<<"!!->Error: Error while opening "<<filename<<"!\n!!->grid data file not exist?"<<endl;
+        else
+        for(i=0;i<Q2Max;i++)
+        {
+                for(j=0;j<35;j++)
+                {
+                        datain>>Q2>>x>>(*(gridDB_largex+(xMax*i+j)*7))>>(*(gridDB_largex+(xMax*i+j)*7+1))>>(*(gridDB_largex+(xMax*i+j)*7+2))>>(*(gridDB_largex+(xMax*i+j)*7+3))>>(*(gridDB_largex+(xMax*i+j)*7+4))>>(*(gridDB_largex+(xMax*i+j)*7+5))>>(*(gridDB_largex+(xMax*i+j)*7+6));
+                }
+        }
+        datain.close();
         sprintf(filename,"grid_data/gridn_%d_%d.dat",1,1);
         cout<<"    Loading "<<filename<<endl;
         datain.open(filename);
@@ -140,22 +230,29 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
                 }
         }
         datain.close();
+        sprintf(filename,"grid_data/gridn_%d_%d_largex.dat",1,1);
+        cout<<"    Loading "<<filename<<endl;
+        datain.open(filename);
+        if(!datain.good())cout<<"!!->Error: Error while opening "<<filename<<"!\n!!->grid data file not exist?"<<endl;
+        else
+        for(i=0;i<Q2Max;i++)
+        {
+                for(j=0;j<35;j++)
+                {
+                        datain>>Q2>>x>>(*(gridN_largex+(xMax*i+j)*7+0))>>(*(gridN_largex+(xMax*i+j)*7+1))>>(*(gridN_largex+(xMax*i+j)*7+2))>>(*(gridN_largex+(xMax*i+j)*7+3))>>(*(gridN_largex+(xMax*i+j)*7+4))>>(*(gridN_largex+(xMax*i+j)*7+5))>>(*(gridN_largex+(xMax*i+j)*7+6));
+                }
+        }
+        datain.close();
 
-	//the default is set B
+	//the default is data set B
 	gridD = gridDB;
+	gridD_largex = gridDB_largex;
 	gridA = gridAB;
-
+	gridA_largex = gridAB_largex;
 }
 
 //the deconstructor
-nIMParton::~nIMParton(void)
-{
-	delete[] gridN;
-	delete[] gridDA;
-        delete[] gridDB;
-	delete[] gridAA;
-        delete[] gridAB;
-}
+nIMParton::~nIMParton(void){}
 
 //return the parton distributions of a nucleus of different kinds at x and Q^2
 double nIMParton::getPDF(int Iparton, double x, double Q2) const
@@ -237,18 +334,21 @@ double nIMParton::getPDFType(int Iparton, double x, double Q2) const
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
 		if(x>0.9999)return 0.0;
-		//if x>0.5, we use A(1-x)^B to do the interpolation
-		else if(x>0.5)
+		//if x>0.47, we use A(1-x)^B to do the interpolation
+		else if(x>0.47)
 		{
-			double vln1_x[2]={log(1-exp(log(1e-6)+i*lnxstep)),log(1-exp(log(1e-6)+(i+1)*lnxstep))};
-			g0[0]=log(gridA[(xMax*j+i)*7+Iparton]);
-			g0[1]=log(gridA[(xMax*j+i+1)*7+Iparton]);
+			double lnxstep2 = log(10)/100.0;
+			int i2 = 32 + (int)(log(x)/lnxstep2);
+			if(i2<=0) i2 = 0;
+			double vln1_x[2]={log(1-exp((i2-34)*lnxstep2)), log(1-exp((i2-33)*lnxstep2))};
+			g0[0]=log(gridA_largex[(xMax*j+i2)*7+Iparton]);
+			g0[1]=log(gridA_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g1[0]=log(gridA[(xMax*j+i)*7+Iparton]);
-			g1[1]=log(gridA[(xMax*j+i+1)*7+Iparton]);
+			g1[0]=log(gridA_largex[(xMax*j+i2)*7+Iparton]);
+			g1[1]=log(gridA_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g2[0]=log(gridA[(xMax*j+i)*7+Iparton]);
-			g2[1]=log(gridA[(xMax*j+i+1)*7+Iparton]);
+			g2[0]=log(gridA_largex[(xMax*j+i2)*7+Iparton]);
+			g2[1]=log(gridA_largex[(xMax*j+i2+1)*7+Iparton]);
 			g[0]=exp(fitLinear(log(1-x),vln1_x,g0));
 			g[1]=exp(fitLinear(log(1-x),vln1_x,g1));
 			g[2]=exp(fitLinear(log(1-x),vln1_x,g2));
@@ -384,18 +484,21 @@ double nIMParton::getPDFTypeD(int Iparton, double x, double Q2) const
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
 		if(x>0.9999)return 0.0;
-		//if x>0.5, we use A(1-x)^B to do the interpolation
-		else if(x>0.5)
+		//if x>0.47, we use A(1-x)^B to do the interpolation
+		else if(x>0.47)
 		{
-			double vln1_x[2]={log(1-exp(log(1e-6)+i*lnxstep)),log(1-exp(log(1e-6)+(i+1)*lnxstep))};
-			g0[0]=log(gridD[(xMax*j+i)*7+Iparton]);
-			g0[1]=log(gridD[(xMax*j+i+1)*7+Iparton]);
+                        double lnxstep2 = log(10)/100.0;
+                        int i2 = 32 + (int)(log(x)/lnxstep2);
+                        if(i2<=0) i2 = 0;
+			double vln1_x[2]={log(1-exp((i2-34)*lnxstep2)), log(1-exp((i2-33)*lnxstep2))};
+			g0[0]=log(gridD_largex[(xMax*j+i2)*7+Iparton]);
+			g0[1]=log(gridD_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g1[0]=log(gridD[(xMax*j+i)*7+Iparton]);
-			g1[1]=log(gridD[(xMax*j+i+1)*7+Iparton]);
+			g1[0]=log(gridD_largex[(xMax*j+i2)*7+Iparton]);
+			g1[1]=log(gridD_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g2[0]=log(gridD[(xMax*j+i)*7+Iparton]);
-			g2[1]=log(gridD[(xMax*j+i+1)*7+Iparton]);
+			g2[0]=log(gridD_largex[(xMax*j+i2)*7+Iparton]);
+			g2[1]=log(gridD_largex[(xMax*j+i2+1)*7+Iparton]);
 			g[0]=exp(fitLinear(log(1-x),vln1_x,g0));
 			g[1]=exp(fitLinear(log(1-x),vln1_x,g1));
 			g[2]=exp(fitLinear(log(1-x),vln1_x,g2));
@@ -531,18 +634,21 @@ double nIMParton::getPDFTypeN(int Iparton, double x, double Q2) const
 		if(j>29)j=29;
 		//avoid log(1-x) calculation in below algorithm
 		if(x>0.9999)return 0.0;
-		//if x>0.5, we use A(1-x)^B to do the interpolation
-		else if(x>0.5)
+		//if x>0.47, we use A(1-x)^B to do the interpolation
+		else if(x>0.47)
 		{
-			double vln1_x[2]={log(1-exp(log(1e-6)+i*lnxstep)),log(1-exp(log(1e-6)+(i+1)*lnxstep))};
-			g0[0]=log(gridN[(xMax*j+i)*7+Iparton]);
-			g0[1]=log(gridN[(xMax*j+i+1)*7+Iparton]);
+                        double lnxstep2 = log(10)/100.0;
+                        int i2 = 32 + (int)(log(x)/lnxstep2);
+                        if(i2<=0) i2 = 0;
+			double vln1_x[2]={log(1-exp((i2-34)*lnxstep2)), log(1-exp((i2-33)*lnxstep2))};
+			g0[0]=log(gridN_largex[(xMax*j+i2)*7+Iparton]);
+			g0[1]=log(gridN_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g1[0]=log(gridN[(xMax*j+i)*7+Iparton]);
-			g1[1]=log(gridN[(xMax*j+i+1)*7+Iparton]);
+			g1[0]=log(gridN_largex[(xMax*j+i2)*7+Iparton]);
+			g1[1]=log(gridN_largex[(xMax*j+i2+1)*7+Iparton]);
 			j++;
-			g2[0]=log(gridN[(xMax*j+i)*7+Iparton]);
-			g2[1]=log(gridN[(xMax*j+i+1)*7+Iparton]);
+			g2[0]=log(gridN_largex[(xMax*j+i2)*7+Iparton]);
+			g2[1]=log(gridN_largex[(xMax*j+i2+1)*7+Iparton]);
 			g[0]=exp(fitLinear(log(1-x),vln1_x,g0));
 			g[1]=exp(fitLinear(log(1-x),vln1_x,g1));
 			g[2]=exp(fitLinear(log(1-x),vln1_x,g2));
@@ -598,6 +704,16 @@ double nIMParton::getPDFTypeN(int Iparton, double x, double Q2) const
 	}
 }
 
+//get F2 ratio of a nucleus to free nucleon
+double nIMParton::getF2RToN(double x, double Q2) const
+{
+	return getF2(x, Q2)/getF2N(x, Q2);
+}
+//get F2 ratio of a nucleus to deuteron
+double nIMParton::getF2RToD(double x, double Q2) const
+{
+	return getF2(x, Q2)/getF2D(x, Q2);
+}
 
 //linear interpolation method
 double nIMParton::fitQuadratic(double x, double* px, double* pf) const

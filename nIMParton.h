@@ -2,15 +2,15 @@
 #define nIMPARTON_H_ 1
 
 class nIMParton
-//this class is for users
+//this class is for the users
 {
 public:
-	nIMParton(unsigned int Z_temp=1, unsigned int A_temp=1); //constructor function, the first parameter is Z, the other is A for a nucleus
+	nIMParton(unsigned int Z_temp=2, unsigned int A_temp=4); //constructor function, the first parameter is Z, the other is A for a nucleus
 	virtual void setDataSet(int);                            //Choose a data set, 1 is for set A and 2 is for set B
-	virtual double getRToN(int, double x, double Q2) const;  //Get parton ratio of nucleus to free nucleon
-	virtual double getRToD(int, double x, double Q2) const;  //Get parton ratio of nucleus to deuteron
-	virtual double getF2RToN(double x, double Q2) const;     //Get F2 ratio of nucleus to free nucleon
-	virtual double getF2RToD(double x, double Q2) const;     //Get F2 ratio of nucleus to deuteron
+	virtual double getRToN_p(int, double x, double Q2) const;  //Get parton ratio of bound proton in nucleus to free proton
+	virtual double getRToD_p(int, double x, double Q2) const;  //Get parton ratio of bound proton in nucleus to bound proton in deuteron
+	virtual double getRToN_n(int, double x, double Q2) const;  //Get parton ratio of bound neutron in nucleus to free neutron
+	virtual double getRToD_n(int, double x, double Q2) const;  //Get parton ratio of bound neutron in nucleus to bound neutron in deuteron
 	virtual ~nIMParton(void);                                //deconstructor function
 
 private:
@@ -22,13 +22,20 @@ private:
 	unsigned int Z;            //atomic number for a nucleus
 	unsigned int A;            //mass number for a nucleus
 
-        double * gridN;            //grid data array for free nucleon
         double * gridD;            //grid data array for deuteron
-        double * gridDA;           //data array storing data set A for deuteron
-        double * gridDB;           //data array storing data set B for deuteron
+        double * gridD_largex;     //grid data array for deuteron at large x
         double * gridA;            //grid data array for a nucleus
+        double * gridA_largex;     //grid data array for a nucleus at large x
+        double * gridAA_largex;    //data array storing data set A for a nucleus at large x
+        double * gridAB_largex;    //data array storing data set B for a nucleus at large x
+        double * gridDA_largex;    //data array storing data set A for deuteron at large x
+        double * gridDB_largex;    //data array storing data set B for deuteron at large x
+        double * gridN_largex;     //grid data array for free nucleon at large x
         double * gridAA;           //data array storing data set A for a nucleus
         double * gridAB;           //data array storing data set B for a nucleus
+        double * gridDA;           //data array storing data set A for deuteron
+        double * gridDB;           //data array storing data set B for deuteron
+        double * gridN;            //grid data array for free nucleon
 
 	virtual double getPDF(int, double x, double Q2) const;   //user function to get PDFs of a nucleus, see ReadMe.txt for details   
         virtual double getXUV(double x, double Q2) const;        //return x(u -ubaar) of a nucleus
@@ -60,6 +67,9 @@ private:
         double getPDFType(int, double x, double Q2) const;
         double getPDFTypeN(int, double x, double Q2) const;
         double getPDFTypeD(int, double x, double Q2) const; 
+
+        virtual double getF2RToN(double x, double Q2) const;     //Get F2 ratio of nucleus to free nucleon
+        virtual double getF2RToD(double x, double Q2) const;     //Get F2 ratio of nucleus to deuteron
 };
 
 #endif
