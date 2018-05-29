@@ -38,6 +38,13 @@ data set A, and setDataSet(2) corresponds to use the data set B. There is a
 little difference between set A and set B. (For isospin-scalar nuclei, set A
 is suggested, and for isospin non-scalar nuclei, set B is suggested.)
 
+
+To access the nuclear parton distribution (per nucleon), the formula should be,
+f_i^A = ( Z*R_i^{p in A}*f_i^p + N*R_i^{n in A}*f_i^n ) / A,
+where i is the index for flavor, f_i^p and f_i^n are the free proton
+PDF and the free neutron PDF respectively. Z, N and A are the proton number,
+neutron number and the atomic number respectively.
+
 ./test.cpp gives an example to get nuclear modifications of different types of
 PDFs of ^3Helium target at high Q^2. ./test.cpp can be modified as users' wants.
 To run the example,
