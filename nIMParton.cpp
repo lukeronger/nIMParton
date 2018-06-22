@@ -8,18 +8,6 @@ extern "C"{
 #include"nIMParton.h"
 using namespace std;
 
-//vectors to store the grid tables
-vector<double> vectorAA_largex(7840);
-vector<double> vectorAB_largex(7840);
-vector<double> vectorDA_largex(7840);
-vector<double> vectorDB_largex(7840);
-vector<double> vectorN_largex(7840);
-vector<double> vectorAA(13664);
-vector<double> vectorAB(13664);
-vector<double> vectorDA(13664);
-vector<double> vectorDB(13664);
-vector<double> vectorN(13664);
-
 //a method used to choose a data set
 void nIMParton::setDataSet(int dataset)
 {
@@ -89,26 +77,37 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
 	lnxstep=log(10)/((xMax-1)/6);
 	lnQ2step=log(2.0);
 
-	vectorAA_largex.resize(7849);
-	vectorAB_largex.resize(7849);
-	vectorDA_largex.resize(7849);
-	vectorDB_largex.resize(7849);
-	vectorN_largex.resize(7849);
-	vectorAA.resize(13669);
-	vectorAB.resize(13669);
-	vectorDA.resize(13669);
-	vectorDB.resize(13669);
-	vectorN.resize(13669);
-	gridAA = vectorAA.data();
-	gridAB = vectorAB.data();
-	gridDA = vectorDA.data();
-	gridDB = vectorDB.data();
-	gridN = vectorN.data();
-	gridAA_largex = vectorAA_largex.data();
-	gridAB_largex = vectorAB_largex.data();
-	gridDA_largex = vectorDA_largex.data();
-	gridDB_largex = vectorDB_largex.data();
-	gridN_largex = vectorN_largex.data();
+	//vectors to store the grid tables
+	vector<double>* vectorAA_largex = new vector<double>(7840);
+	vector<double>* vectorAB_largex = new vector<double>(7840);
+	vector<double>* vectorDA_largex = new vector<double>(7840);
+	vector<double>* vectorDB_largex = new vector<double>(7840);
+	vector<double>* vectorN_largex = new vector<double>(7840);
+	vector<double>* vectorAA = new vector<double>(13664);
+	vector<double>* vectorAB = new vector<double>(13664);
+	vector<double>* vectorDA = new vector<double>(13664);
+	vector<double>* vectorDB = new vector<double>(13664);
+	vector<double>* vectorN = new vector<double>(13664);
+	vectorAA_largex->resize(7849);
+	vectorAB_largex->resize(7849);
+	vectorDA_largex->resize(7849);
+	vectorDB_largex->resize(7849);
+	vectorN_largex->resize(7849);
+	vectorAA->resize(13669);
+	vectorAB->resize(13669);
+	vectorDA->resize(13669);
+	vectorDB->resize(13669);
+	vectorN->resize(13669);  
+	gridAA = vectorAA->data();
+	gridAB = vectorAB->data();
+	gridDA = vectorDA->data();
+	gridDB = vectorDB->data();
+	gridN = vectorN->data();
+	gridAA_largex = vectorAA_largex->data();
+	gridAB_largex = vectorAB_largex->data();
+	gridDA_largex = vectorDA_largex->data();
+	gridDB_largex = vectorDB_largex->data();
+	gridN_largex = vectorN_largex->data();
 
 	//read grid data for interpolation
 	//reading data set A
@@ -250,6 +249,8 @@ nIMParton::nIMParton(unsigned int Z_temp, unsigned int A_temp)
 	gridA = gridAB;
 	gridA_largex = gridAB_largex;
 }
+
+
 
 //the deconstructor
 nIMParton::~nIMParton(void){}
