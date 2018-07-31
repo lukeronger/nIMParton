@@ -1,4 +1,4 @@
-nIMParton v1.1
+nIMParton
 -- nIMParton = nuclear (version of) I'mParton
 
 1. Description
@@ -48,10 +48,13 @@ neutron number and the atomic number respectively.
 ./test.cpp gives an example to get nuclear modifications of different types of
 PDFs of ^3Helium target at high Q^2. ./test.cpp can be modified as users' wants.
 To run the example,
->tar -zvxf nIMParton.tar.gz
+>git clone https://github.com/lukeronger/nIMParton.git
 >cd nIMParton
+>cmake .
 >make
 >./test
+
+(a makefile is also provided. alternative compiling: make -f _makefile)
 
 3. Method
 We provide two data sets of nPDFs obtained from the global analyses to
